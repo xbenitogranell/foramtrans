@@ -200,7 +200,6 @@ df <- bind_rows(wa1df, wa2df, wa3df, wa4df, wa5df, wa6df) %>%
 colnames(df)
 
 # first bind ind rows, then spread, and create a list of datasets
-
 ## Leaflet map (quickly visualize distribution of samples)
 library(leaflet)
 
@@ -645,12 +644,12 @@ wa20df <- wa20 %>%
   select(-value)
 
 
-## Bind dataframes in wide format and spread
+## Bind dataframes in long format and spread
 df1 <- bind_rows(wa1df, wa2df, wa3df, wa4df, wa5df, wa6df,
   wa7df, wa8df, wa9df, wa10df, wa11df, wa12df, wa13df, wa14df, wa15df,
                  wa16df, wa17df, wa18df, wa19df, wa20df) %>% spread(variable, value_num)
   
-
+# Plot leaflet map
 df1 %>% 
   leaflet() %>%
   addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
@@ -662,6 +661,958 @@ df1 %>%
                                    "Site: ", as.character(df1$site), "<br>")) 
 
 
- 
+####
+## WA21
+wa21 <- all_data[[3]][["WA-21"]]
+colnames(wa21) <- wa21[1,]
+wa21 <- wa21[-1,]
+wa21[,1] <- rownames(wa21)
+colnames(wa21)[1] <- "site"
+wa21[,1] <- c("Scottetal1991")
+colnames(wa21)[6] <- "sample"
+
+site_coord_env <- wa21 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, sample) %>%
+  unite(site, site, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa21)
+wa21df <- wa21 %>%
+  as.data.frame() %>%
+  select(seq(7,23)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+## WA22
+wa22 <- all_data[[3]][["WA-22"]]
+colnames(wa22) <- wa22[1,]
+wa22 <- wa22[-1,]
+wa22[,1] <- rownames(wa22)
+colnames(wa22)[1] <- "site"
+wa22[,1] <- c("Phleger1965")
+colnames(wa22)[6] <- "sample"
+wa22[,6] <- seq(length(wa22[,6]))
 
 
+site_coord_env <- wa22 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, sample, Location) %>%
+  fill(Location, .direction = "up") %>% #fill in downward values that are missing 
+  fill(Location, .direction = "down") %>% #fill in downward values that are missing 
+  unite(site, site, sample, Location) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa22)
+wa22df <- wa22 %>%
+  as.data.frame() %>%
+  select(seq(8,58)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA23
+wa23 <- all_data[[3]][["WA-23"]]
+colnames(wa23) <- wa23[1,]
+wa23 <- wa23[-1,]
+wa23[,1] <- rownames(wa23)
+colnames(wa23)[1] <- "site"
+wa23[,1] <- c("Phleger1965")
+
+
+site_coord_env <- wa23 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Station) %>%
+  unite(site, site, Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa23)
+wa23df <- wa23 %>%
+  as.data.frame() %>%
+  select(seq(6,39)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA24
+wa24 <- all_data[[3]][["WA-24"]]
+colnames(wa24) <- wa24[1,]
+wa24 <- wa24[-1,]
+wa24[,1] <- rownames(wa24)
+colnames(wa24)[1] <- "site"
+wa24[,1] <- c("Debeneyetal2002")
+colnames(wa24)[5] <- "sample" 
+
+
+site_coord_env <- wa24 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, sample) %>%
+  unite(site, site, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa24)
+
+wa24df <- wa24 %>%
+  as.data.frame() %>%
+  select(seq(6,29)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+##WA25
+wa25 <- all_data[[3]][["WA-25"]]
+colnames(wa25) <- wa25[1,]
+wa25 <- wa25[-1,]
+wa25[,1] <- rownames(wa25)
+colnames(wa25)[1] <- "site"
+wa25[,1] <- c("Scott1989")
+colnames(wa25)[5] <- "station" 
+
+
+site_coord_env <- wa25 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Location, station) %>%
+  fill(Location, .direction="down") %>%
+  unite(site, site, Location, station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa25)
+
+wa25 <- wa25 %>%
+  as.data.frame() %>%
+  select(seq(6,22)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA26
+wa26 <- all_data[[3]][["WA-26"]]
+colnames(wa26) <- wa26[1,]
+wa26 <- wa26[-1,]
+wa26[,1] <- rownames(wa26)
+colnames(wa26)[1] <- "site"
+wa26[,1] <- c("Barbosaetal2005")
+
+
+site_coord_env <- wa26 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Sample, "Elevation cm") %>%
+  unite(site, site, Sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa26)
+
+wa26 <- wa26 %>%
+  as.data.frame() %>%
+  select(seq(7,26)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA27
+wa27 <- all_data[[3]][["WA-27"]]
+colnames(wa27) <- wa27[1,]
+wa27 <- wa27[-1,]
+wa27[,1] <- rownames(wa27)
+colnames(wa27)[1] <- "site"
+wa27[,1] <- c("Phleger1967")
+
+
+site_coord_env <- wa27 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Location, "Marsh area", Station) %>%
+  fill(Location, .direction = "down") %>%
+  fill("Marsh area", .direction = "down") %>%
+  unite(site, site, Location, "Marsh area", Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa27)
+
+wa27 <- wa27 %>%
+  as.data.frame() %>%
+  select(seq(8,42)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA28
+wa28 <- all_data[[3]][["WA-28"]]
+colnames(wa28) <- wa28[1,]
+wa28 <- wa28[-1,]
+wa28[,1] <- rownames(wa28)
+colnames(wa28)[1] <- "site"
+wa28[,1] <- c("Ozarkoetal1997")
+wa28 <- wa28[c(1:5),]
+wa28 <- wa28[,-c(6:15)]
+wa28 <- wa28[,-4]
+
+
+site_coord_env <- wa28 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, "Sample station") %>%
+  unite(site, site,"Sample station") %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa28)
+
+wa28 <- wa28 %>%
+  as.data.frame() %>%
+  select(seq(9,13)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA29
+wa29 <- all_data[[3]][["WA-29"]]
+colnames(wa29) <- wa29[1,]
+wa29 <- wa29[-1,]
+wa29[,1] <- rownames(wa29)
+colnames(wa29)[5] <- "sample"
+wa29[,1] <- c("Scottetal1976")
+colnames(wa29)[1] <- "site"
+
+
+site_coord_env <- wa29 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Percent, sample) %>%
+  unite(site, site, Percent, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa29)
+
+wa29 <- wa29 %>%
+  as.data.frame() %>%
+  select(seq(6,37)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA30
+wa30 <- all_data[[3]][["WA-30"]]
+colnames(wa30) <- wa30[1,]
+wa30 <- wa30[-1,]
+wa30[,1] <- rownames(wa30)
+wa30[,1] <- c("Phleger1965")
+colnames(wa30)[1] <- "site"
+
+
+site_coord_env <- wa30 %>%
+  as.data.frame() %>%
+  select(site, Traverse, "Habitat type", Coordinates, Station) %>%
+  fill(Traverse, .direction = "down") %>% #fill in downward values that are missing 
+  fill("Habitat type", .direction = "down") %>% #fill in downward values that are missing 
+  unite(site, site, Traverse, "Habitat type", Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa30)
+
+wa30 <- wa30 %>%
+  as.data.frame() %>%
+  select(seq(7,41)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA31
+wa31 <- all_data[[3]][["WA-31"]]
+colnames(wa31) <- wa31[1,]
+wa31 <- wa31[-1,]
+wa31[,1] <- rownames(wa31)
+wa31[,1] <- c("Phleger&Ewing1962")
+colnames(wa31)[1] <- "site"
+colnames(wa31)[4] <- "Coordinates"
+
+
+site_coord_env <- wa31 %>%
+  as.data.frame() %>%
+  select(site, Location, Coordinates, Station) %>%
+  fill(Location, .direction = "down") %>% #fill in downward values that are missing 
+  unite(site, site, Location, Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa31)
+
+wa31 <- wa31 %>%
+  as.data.frame() %>%
+  select(seq(6,56)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA32
+wa32 <- all_data[[3]][["WA-32"]]
+colnames(wa32) <- wa32[1,]
+wa32 <- wa32[-1,]
+wa32[,1] <- rownames(wa32)
+wa32[,1] <- c("Scottetal1995")
+colnames(wa32)[1] <- "site"
+colnames(wa32)[3] <- "Coordinates"
+
+
+site_coord_env <- wa32 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, "Station number", "Elevation in cm above mean sea level") %>%
+  unite(site, site, "Station number") %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa32)
+
+wa32 <- wa32 %>%
+  as.data.frame() %>%
+  select(seq(7,16)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+
+##WA33
+wa33 <- all_data[[3]][["WA-33"]]
+colnames(wa33) <- wa33[1,]
+wa33 <- wa33[-1,]
+wa33[,1] <- rownames(wa33)
+wa33[,1] <- c("Phleger1970")
+colnames(wa33)[1] <- "site"
+colnames(wa33)[3] <- "station"
+colnames(wa33)[5] <- "sample"
+
+
+site_coord_env <- wa33 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station, sample) %>%
+  fill(station, .direction = "down") %>% #fill in downward values that are missing 
+  unite(site, site, station, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa33)
+
+wa33 <- wa33 %>%
+  as.data.frame() %>%
+  select(seq(6,15)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA34
+wa34 <- all_data[[3]][["WA-34"]]
+colnames(wa34) <- wa34[1,]
+wa34 <- wa34[-1,]
+wa34[,1] <- rownames(wa34)
+wa34[,1] <- c("Haywardetal1999")
+wa34[,2] <- seq(length(wa34[,2]))
+colnames(wa34)[1] <- "site"
+colnames(wa34)[2] <- "sample"
+wa34[,3] <- "Kaipara"
+colnames(wa34)[3] <- "station"
+
+
+site_coord_env <- wa34 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station, sample) %>%
+  unite(site, site, station, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa34)
+
+wa34 <- wa34 %>%
+  as.data.frame() %>%
+  select(seq(11,24)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA35
+wa35 <- all_data[[3]][["WA-35"]]
+colnames(wa35) <- wa35[1,]
+wa35 <- wa35[-1,]
+wa35[,1] <- rownames(wa35)
+wa35[,1] <- c("Hortonetal2005")
+colnames(wa35)[1] <- "site"
+colnames(wa35)[5] <- "sample"
+
+
+site_coord_env <- wa35 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Percent, sample) %>%
+  fill(Percent, .direction = "down") %>% #fill in downward values that are missing 
+  unite(site, site, Percent, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="marsh")
+
+colnames(wa35)
+
+wa35 <- wa35 %>%
+  as.data.frame() %>%
+  select(seq(6,45)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+##WA36
+wa36 <- all_data[[4]][["WA-36"]]
+colnames(wa36) <- wa36[1,]
+wa36 <- wa36[-1,]
+wa36[,1] <- rownames(wa36)
+wa36[,1] <- c("Korsun1999")
+colnames(wa36)[1] <- "site"
+colnames(wa36)[3] <- "Coordinates"
+colnames(wa36)[7] <- "station"
+
+
+site_coord_env <- wa36 %>%
+  as.data.frame() %>%
+  select(site, Coordinates,station, "Water depth m") %>%
+  unite(site, site, station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa36)
+
+wa36 <- wa36 %>%
+  as.data.frame() %>%
+  select(seq(8,33)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA37
+wa37 <- all_data[[4]][["WA-37"]]
+colnames(wa37) <- wa37[1,]
+wa37 <- wa37[-1,]
+wa37[,1] <- rownames(wa37)
+wa37[,1] <- c("Alve&urray1999")
+colnames(wa37)[1] <- "site"
+
+
+site_coord_env <- wa37 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Area, "Sample no.", "Water depth (m)") %>%
+  fill(Area, .direction = "down") %>%
+  unite(site, site, Area, "Sample no.") %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa37)
+
+wa37 <- wa37 %>%
+  as.data.frame() %>%
+  select(seq(8,34)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA38
+wa38 <- all_data[[4]][["WA-38"]]
+colnames(wa38) <- wa38[1,]
+wa38 <- wa38[-1,]
+wa38[,1] <- rownames(wa38)
+wa38[,1] <- c("VanVoorthuysen1960")
+colnames(wa38)[1] <- "site"
+
+
+site_coord_env <- wa38 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Sample) %>%
+  unite(site, site, Sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa38)
+
+wa38 <- wa38 %>%
+  as.data.frame() %>%
+  select(seq(5,9)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+
+##WA39
+wa39 <- all_data[[4]][["WA-39"]]
+colnames(wa39) <- wa39[1,]
+wa39 <- wa39[-1,]
+wa39[,1] <- rownames(wa39)
+wa39[,1] <- c("Wang1983")
+colnames(wa39)[1] <- "site"
+wa39[,6] <- seq(length(wa39[,6]))
+colnames(wa39)[6] <- "sample"
+
+site_coord_env <- wa39 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, sample) %>%
+  unite(site, site, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa39)
+
+wa39 <- wa39 %>%
+  as.data.frame() %>%
+  select(seq(7,16)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+
+##WA40
+wa40 <- all_data[[4]][["WA-40"]]
+colnames(wa40) <- wa40[1,]
+wa40 <- wa40[-1,]
+wa40[,1] <- rownames(wa40)
+wa40[,1] <- c("Murray1965")
+colnames(wa40)[1] <- "site"
+wa40 <- wa40[-7,]
+
+site_coord_env <- wa40 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Station) %>%
+  unite(site, site, Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa40)
+
+wa40 <- wa40 %>%
+  as.data.frame() %>%
+  select(seq(8,77)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA41
+wa41 <- all_data[[4]][["WA-41"]]
+colnames(wa41) <- wa41[1,]
+wa41 <- wa41[-1,]
+wa41[,1] <- rownames(wa41)
+wa41[,1] <- c("Murray1983")
+colnames(wa41)[1] <- "site"
+colnames(wa41)[5] <- "station"
+
+site_coord_env <- wa41 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station) %>%
+  unite(site, site, station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa41)
+
+wa41 <- wa41 %>%
+  as.data.frame() %>%
+  select(seq(6,46)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+##WA42
+wa42 <- all_data[[4]][["WA-42"]]
+colnames(wa42) <- wa42[1,]
+wa42 <- wa42[-1,]
+wa42[,1] <- rownames(wa42)
+wa42[,1] <- c("Murray1968")
+colnames(wa42)[1] <- "site"
+colnames(wa42)[4] <- "station"
+
+site_coord_env <- wa42 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station, Sample) %>%
+  fill(station, .direction = "down") %>%
+  unite(site, site, station, Sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa42)
+
+wa42 <- wa42 %>%
+  as.data.frame() %>%
+  select(seq(6,40)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value)
+
+
+
+##WA43
+wa43 <- all_data[[4]][["WA-43"]]
+colnames(wa43) <- wa43[1,]
+wa43 <- wa43[-1,]
+wa43[,1] <- rownames(wa43)
+wa43[,1] <- c("Alve&Murray1994")
+colnames(wa43)[1] <- "site"
+colnames(wa43)[4] <- "station"
+colnames(wa43)[5] <- "sample"
+
+site_coord_env <- wa43 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station, sample) %>%
+  fill(station, .direction = "down") %>%
+  unite(site, site, station, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa43)
+
+wa43 <- wa43 %>%
+  as.data.frame() %>%
+  select(seq(6,29)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
+
+
+##WA44
+wa44 <- all_data[[4]][["WA-44"]]
+colnames(wa44) <- wa44[1,]
+wa44 <- wa44[-1,]
+wa44[,1] <- rownames(wa44)
+wa44[,1] <- c("Murray&Alve2000")
+colnames(wa44)[1] <- "site"
+colnames(wa44)[4] <- "station"
+colnames(wa44)[5] <- "sample"
+
+site_coord_env <- wa44 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station, sample) %>%
+  fill(station, .direction = "down") %>%
+  unite(site, site, station, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa44)
+
+wa44 <- wa44 %>%
+  as.data.frame() %>%
+  select(seq(6,31)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
+
+
+##WA45 --> Warsash sta.2 from Alve and Murray 2000
+
+## WA46
+wa46 <- all_data[[4]][["WA-46"]]
+colnames(wa46) <- wa46[1,]
+wa46 <- wa46[-1,]
+wa46[,1] <- rownames(wa46)
+wa46[,1] <- c("Elison1984")
+colnames(wa46)[1] <- "site"
+colnames(wa46)[5] <- "station"
+colnames(wa46)[6] <- "sample"
+
+site_coord_env <- wa46 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, station, sample) %>%
+  unite(site, site, station, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa46)
+
+wa46 <- wa46 %>%
+  as.data.frame() %>%
+  select(seq(7,15)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) 
+
+
+## WA47
+wa47 <- all_data[[4]][["WA-47"]]
+colnames(wa47) <- wa47[1,]
+wa47 <- wa47[-1,]
+wa47[,1] <- rownames(wa47)
+wa47[,1] <- c("LeCampion1970")
+wa47 <- wa47[-c(2,7,11,16,21,24,25,26,31,36),]
+colnames(wa47)[1] <- "site"
+colnames(wa47)[4] <- "habitat"
+colnames(wa47)[5] <- "station"
+
+site_coord_env <- wa47 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, habitat, station) %>%
+  fill(habitat, .direction = "down") %>%
+  unite(site, site, habitat, station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa47)
+
+wa47 <- wa47 %>%
+  as.data.frame() %>%
+  select(seq(6,66)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) 
+
+
+## WA48
+wa48 <- all_data[[4]][["WA-48"]]
+colnames(wa48) <- wa48[1,]
+wa48 <- wa48[-1,]
+wa48[,1] <- rownames(wa48)
+wa48[,1] <- c("Cearreta1988a")
+colnames(wa48)[1] <- "site"
+colnames(wa48)[4] <- "year"
+colnames(wa48)[5] <- "habitat"
+
+site_coord_env <- wa48 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, site, year, habitat, Station) %>%
+  fill(year, .direction = "down") %>%
+  fill(habitat, .direction = "down") %>%
+  unite(site, site, year, habitat, Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa48)
+
+wa48 <- wa48 %>%
+  as.data.frame() %>%
+  select(seq(7,53)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
+
+
+## WA49
+wa49 <- all_data[[4]][["WA-49"]]
+colnames(wa49) <- wa49[1,]
+wa49 <- wa49[-1,]
+wa49[,1] <- rownames(wa49)
+wa49[,1] <- c("Cearreta1988b")
+colnames(wa49)[1] <- "site"
+colnames(wa49)[4] <- "year"
+colnames(wa49)[5] <- "habitat"
+
+site_coord_env <- wa49 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, site, year, habitat) %>%
+  fill(year, .direction = "down") %>%
+  fill(habitat, .direction = "down") %>%
+  unite(site, site, year, habitat) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa49)
+
+wa49 <- wa49 %>%
+  as.data.frame() %>%
+  select(seq(6,58)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
+
+
+
+## WA50
+wa50 <- all_data[[4]][["WA-50"]]
+colnames(wa50) <- wa50[1,]
+wa50 <- wa50[-1,]
+wa50[,1] <- rownames(wa50)
+wa50[,1] <- c("Donnicietal1997")
+colnames(wa50)[1] <- "site"
+colnames(wa50)[7] <- "sample"
+
+site_coord_env <- wa50 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, year, sample, "sample number") %>%
+  unite(site, site, year, sample, "sample number") %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa50)
+
+wa50 <- wa50 %>%
+  as.data.frame() %>%
+  select(seq(9,47)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
+
+##WA51 --> discarded because I couldn't find the original paper showing the geographical coordinates
+
+## WA52
+wa52 <- all_data[[5]][["WA-52"]]
+colnames(wa52) <- wa52[1,]
+wa50 <- wa52[-1,]
+wa52[,1] <- rownames(wa52)
+wa52[,1] <- c("Scottetal1977")
+wa52 <- wa52[-1,]
+colnames(wa52)[1] <- "site"
+colnames(wa52)[5] <- "sample"
+
+
+site_coord_env <- wa52 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, sample) %>%
+  unite(site, site, sample) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+colnames(wa52)
+
+wa52 <- wa52 %>%
+  as.data.frame() %>%
+  select(seq(6,21)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
+
+##WA53
+wa53 <- all_data[[5]][["WA-53"]]
+colnames(wa53) <- wa53[1,]
+wa53 <- wa53[-1,]
+wa53[,1] <- rownames(wa53)
+wa53[,1] <- c("Scottetal1980")
+colnames(wa53)[1] <- "site"
+
+
+site_coord_env <- wa53 %>%
+  as.data.frame() %>%
+  select(site, Coordinates, Station) %>%
+  unite(site, site, Station) %>%
+  separate(Coordinates, into = c("lat", "long"), sep = ";", convert = TRUE) %>%
+  fill(lat, .direction = "down") %>% #fill in downward values that are missing 
+  fill(long, .direction = "down") %>%
+  mutate(habitat="lagoon")
+
+site_coord_env <- site_coord_env[-nrow(site_coord_env),] #delete last row (shelf sample)
+colnames(wa53)
+
+wa53 <- wa53[-nrow(wa53),] %>%
+  as.data.frame() %>%
+  select(seq(6,27)) %>% # species columns
+  bind_cols(site_coord_env) %>% #bind site, coordinates and environmental columns
+  gather(key=variable,value=value, -site, -habitat) %>% #gather
+  mutate(value_num=as.numeric(value)) %>%
+  select(-value) %>%
+  replace(is.na(.), 0) #replace NA with 0
