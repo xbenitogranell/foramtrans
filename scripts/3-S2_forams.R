@@ -102,7 +102,7 @@ stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y =
   labs(x = "Relative abundance (%)", y = "core depth (m)", colour="Assemblage") +
   ggtitle("S2 core") +
   theme (legend.position = "bottom") +
-  geom_hline(yintercept = zones, col = "blue", lty = 1, alpha = 0.7)
+  geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.7)
 stratiplot
 
 ## Plot XRF
@@ -110,7 +110,7 @@ stratiplot
 S2_geochem_long <- gather(data=S2_geochem_data, key = param, value = value, -depth)
 
 S2_plot_geochem <- S2_geochem_long %>%
-  #filter(param %in% c("Fe", "K", "Si")) %>%
+  filter(param %in% c("Fe", "Zr", "Si")) %>%
   ggplot(aes(x = value, y = depth)) +
   geom_lineh() +
   geom_point() +
@@ -134,11 +134,11 @@ S2_plot_geochem +
 library(patchwork)
 wrap_plots(
   stratiplot + 
-    theme(strip.background = element_blank(), strip.text.y = element_blank()) +
+    theme(strip.background = element_blank(), strip.text.y = element_blank()),
   S2_plot_geochem +
     #layer_dendrogram(coniss, component = "CONISS", aes(y = depth)) +
     theme(axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()) +
     labs(y = NULL),
   nrow = 1,
-  widths = c(1, 1)
+  widths = c(3, 1)
 )
