@@ -3,7 +3,9 @@ library(ade4)
 
 # Read in XRF data
 S2_geochem_data <- read.csv("datasets/S2/S2_XRF.csv") %>%
-  dplyr::select(-LE)
+  dplyr::select(-LE) %>%
+  dplyr::rename(depth=ï..depth )
+
 str(S2_geochem_data)
 
 # Prepare data
@@ -97,6 +99,7 @@ row.has.na <- apply(PCA.data, 1, function(x){any(is.na(x))})
 sum(row.has.na)
 PCA.data <- na.omit(PCA.data)
 
+# Run PCA with vegan
 modPCA <- rda(PCA.data, scale=TRUE)
 plot(modPCA, scale=3)
 
@@ -115,7 +118,7 @@ axis.expl <- function(mod, axes = 1:2) {
 
 (labs_PCA<- axis.expl(modPCA))
 
-# Fortify the ordinations for ggploting--for each model
+# Fortify the ordinations for ggploting
 ford <- fortify(modPCA, axes = 1:2)  # fortify the ordination
 take <- c('PC1', 'PC2')  # which columns contain the scores we want
 sites <- subset(ford, Score == 'sites')  # take only biplot arrow scores
@@ -126,8 +129,6 @@ mul <- ggvegan:::arrowMul(arrows[, take],
                           subset(ford, select = take, Score == 'species'))
 arrows[, take] <- arrows[, take] * mul  # scale biplot arrows
 
-# create a vector with significant variables
-#sign_llav<- paste(c("Cropland", "HumanDensity"), collapse = '|')
 
 #plot
 PCA_XRF <- ggplot() +

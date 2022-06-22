@@ -9,24 +9,30 @@ pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
 library(rbacon)
 library(tidyverse)
 
-
 ## Build mixed curve for marine and brackish material
 mix.curves(proportion = 0.5, cc1 = "3Col_intcal13.14C",
            cc2 = "3Col_marine20.14C", name = "mixed.14C", dirname = "Bacon_runs")
 
-
+#Carlet core
 Bacon("carlet", thick = 5, prob = 0.95, sep = ";",
       d.min = 74, d.max = 1620, d.by = 10, unit = "cm", cc=2, acc.shape = 2, 
       acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
 
-## mixed calibration curve
-Bacon(core = "carlet", thick = 5, prob = 0.95,
-      d.min = 74, d.max = 1620, d.by = 10, unit = "cm", cc=4, cc4="mixed.14C", acc.shape = 2, 
+  ## mixed calibration curve
+  Bacon(core = "carlet", thick = 5, prob = 0.95,
+        d.min = 74, d.max = 1620, d.by = 10, unit = "cm", cc=4, cc4="mixed.14C", acc.shape = 2, 
+        acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
+
+#S2 core
+Bacon("S2_core", thick = 20, prob = 0.95, sep = ";",
+      d.min = 1800, d.max = 3810, d.by = 10, unit = "cm", cc=2, acc.shape = 2, 
       acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
 
+add.dates(9550, 50, 3810)
 
 
-## Examples from lake sediment cores
+
+## Examples from other lake sediment cores
 #yahuarcocha core
 Bacon(core="yahuarcocha", prob = 0.95, thick = 5,
       d.min = 1, d.max = 57, d.by = 1, unit = "cm", acc.shape = 1.5, acc.mean = 20, mem.strength = 4,
@@ -46,24 +52,6 @@ Bacon(core="pinan", thick = 1, prob = 0.95,
         acc.mean = c(50,100), slump = c(39,40))
   
   
-
-#Titicaca (Weide et al 2017) CHUA3 core
-Bacon("titicaca", thick = 4, prob = 0.95,
-      d.min = 0, d.max = 169, d.by = 1, unit = "cm", cc=4, cc4="mixed.14C", hiatus.depths = c(47, 54, 73), acc.shape = 2, 
-      acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
-
-#Titicaca (Weide et al 2017) LT01-3A core
-Bacon("titicaca-LT01-3A", thick = 1, prob = 0.95, cc=3,
-      unit = "cm", d.min = 117, d.max=4929, hiatus.depths = c(290, 344, 390),
-      acc.shape = 1.5, acc.mean = 15, mem.strength = 4, mem.mean = 0.7)
-
-
-#Umayo (Ekhdal et al 2008)
-Bacon("umayo", thick = 2, prob = 0.95,
-      d.min = 1, d.max = 678, d.by = 0.1, unit = "cm", acc.shape = 2, 
-      acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
-
-
 # Bacon Age Modelling to generate tables for MCEOF (code from Jon Tyler)
 #get sample depths
 #Llaviucu
