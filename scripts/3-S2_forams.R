@@ -97,7 +97,7 @@ diss <- vegdist(foramsHel, method="bray")
 clust <- chclust(diss, method="coniss")
 bstick(clust)
 
-zones <- cutree(clust, k=3)
+zones <- cutree(clust, k=2)
 locate <- cumsum(rle(zones)$lengths)+1
 zones <- core_counts_wide_forams[locate, ][,1]
 zones <- zones$depth
@@ -114,21 +114,39 @@ stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y =
   labs(x = "Relative abundance (%)", y = "core depth (m)", colour="Assemblage") +
   ggtitle("S2 core") +
   theme (legend.position = "bottom") +
+  theme(axis.text.x=element_text(size = 8)) +
   geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9)
 stratiplot
+
+
+## XRF
+#do coniss on XRF to add statistically significant stratigraphic zones
+S2_geochem_data[is.na(S2_geochem_data)] <- 0
+
+XRFHel <- decostand(S2_geochem_data[,2:ncol(S2_geochem_data)], method="hellinger")
+diss <- vegdist(XRFHel, method="bray")
+clust <- chclust(diss, method="coniss")
+bstick(clust)
+
+zones <- cutree(clust, k=3) #k=groups
+locate <- cumsum(rle(zones)$lengths)+1
+zones <- S2_geochem_data[locate, ][,1]
+#zones <- zones$depth
 
 ## Plot XRF
 # Prepare long-format
 S2_geochem_long <- gather(data=S2_geochem_data, key = param, value = value, -depth) #depth is column 1
 
 S2_plot_geochem <- S2_geochem_long %>%
-  filter(param %in% c("Fe", "Zr", "Si")) %>%
+  filter(param %in% c("Fe", "Ti", "Ca", "Sr", "Zr")) %>%
   ggplot(aes(x = value, y = depth)) +
   geom_lineh() +
+  geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9) +
   geom_point() +
   scale_y_reverse() +
   facet_geochem_gridh(vars(param)) +
-  labs(x = NULL, y = "Depth (cm)")
+  labs(x = NULL, y = "Depth (cm)") +
+  theme(axis.text.x=element_text(size = 8))
 S2_plot_geochem
 
 #ggsave("outputs/forams_stratplot.png", stratiplot, height = 6, width = 10)
@@ -148,22 +166,23 @@ S2_sand_long <- S2_sand %>%
   gather(key = param, value = value, -depth)
 
 S2_sand_plt <- ggplot(S2_sand_long, aes(x = depth, y = value)) +
+  # geom_areah() +
   geom_line() +
-  geom_point() +
+  # geom_point() +
   scale_y_reverse() +
   scale_x_reverse() +
   #facet_grid(~param) +
   coord_flip() +
+  theme(axis.text.x=element_text(size = 8)) +
   #geom_smooth() +
   labs(x = NULL, y = "sand (%)")
   #ggtitle("S2 % sand")
 S2_sand_plt
 
-
 # Combine species abundance data and XRF plots
 library(patchwork)
 
-wrap_plots(
+plt <- wrap_plots(
   stratiplot + 
     theme(strip.background = element_blank(), strip.text.y = element_blank()),
   S2_plot_geochem +
@@ -176,3 +195,16 @@ wrap_plots(
   widths = c(3,1,0.3)
 )
 
+plt
+
+ggsave("outputs/S2_multiproxy.png", plt, height = 6, width = 10)
+
+## Composite plot (stratiplots + PCA)
+library(cowplot)
+
+composite <- ggdraw() +
+  draw_plot(plot) +
+  draw_plot(PCA_XRF, x = 0.8, y = 0.7, width = .3, height = .3)
+composite
+
+ggsave("outputs/composite.png", composite, height = 6, width = 10)

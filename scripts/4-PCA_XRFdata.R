@@ -147,6 +147,9 @@ PCA_XRF <- ggplot() +
   coord_fixed()
 PCA_XRF
 
+ggsave("outputs/PCA_XRF.png", PCA_XRF, height = 6, width = 10)
+
+
 ## plot downcore PCA-NIpals factor scores
 PCA_components_long <- gather(data=Factor.scores %>% select(c("PCA1", "PCA2","depth")), key = param, value = value, -depth) 
 
