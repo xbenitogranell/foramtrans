@@ -59,6 +59,9 @@ colnames(PCA.nipals$li) <- c("PCA1", "PCA2")
 Factor.scores <- data.frame(cbind(PCA.data, PCA.nipals$li))
 Factor.scores$depth <- S2_geochem_data$depth
 
+
+
+
 #Create data frame with site scores and regions
 #region <- site.time[1:21,] #lake regions of the modern diatom dataset
 PCA.scores <- data.frame(component1=Factor.scores$PCA1, component2=Factor.scores$PCA2)
@@ -129,6 +132,7 @@ mul <- ggvegan:::arrowMul(arrows[, take],
                           subset(ford, select = take, Score == 'species'))
 arrows[, take] <- arrows[, take] * mul  # scale biplot arrows
 
+ford[locate, ]
 
 #plot
 PCA_XRF <- ggplot() +
@@ -153,14 +157,14 @@ ggsave("outputs/PCA_XRF.png", PCA_XRF, height = 6, width = 10)
 ## plot downcore PCA-NIpals factor scores
 PCA_components_long <- gather(data=Factor.scores %>% select(c("PCA1", "PCA2","depth")), key = param, value = value, -depth) 
 
-ggplot(PCA_components_long, aes(x = depth, y = value)) +
+PCA_components_plt <- ggplot(PCA_components_long, aes(x = depth, y = value)) +
   geom_line() +
   geom_point() +
   scale_y_reverse() +
   scale_x_reverse() +
   facet_grid(~param) +
   coord_flip() +
-  geom_smooth() +
+  #geom_smooth() +
   labs(x = "core depth (m)", y = NULL) +
-  ggtitle("S2 XRF data")
+  ggtitle("")
 

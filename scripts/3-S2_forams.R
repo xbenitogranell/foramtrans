@@ -32,7 +32,10 @@ S2_sand$sand <- as.numeric(gsub(",", ".", gsub("\\.", "", S2_sand$sand))) #repla
 
 # Read in XRF data
 S2_geochem_data <- read.csv("datasets/S2/S2_XRF.csv") %>%
-  dplyr::rename(depth=ï..depth)
+  dplyr::rename(depth=ï..depth) %>%
+  mutate(Sr_Rb=Sr/Rb) %>% #unweathered terrestrial fraction
+  mutate(lnCa_Ti=log(Ca/Ti))%>% #biogenic CaCO3 vs detrital input
+  mutate(Si_Zr=Si/Zr) 
 str(S2_geochem_data)
 
 ## Calculate relative abundance
@@ -97,7 +100,7 @@ diss <- vegdist(foramsHel, method="bray")
 clust <- chclust(diss, method="coniss")
 bstick(clust)
 
-zones <- cutree(clust, k=2)
+zones <- cutree(clust, k=3)
 locate <- cumsum(rle(zones)$lengths)+1
 zones <- core_counts_wide_forams[locate, ][,1]
 zones <- zones$depth
@@ -138,11 +141,11 @@ zones <- S2_geochem_data[locate, ][,1]
 S2_geochem_long <- gather(data=S2_geochem_data, key = param, value = value, -depth) #depth is column 1
 
 S2_plot_geochem <- S2_geochem_long %>%
-  filter(param %in% c("Fe", "Ti", "Ca", "Sr", "Zr")) %>%
+  filter(param %in% c("Ca", "Si", "S", "Fe", "Zr")) %>%
   ggplot(aes(x = value, y = depth)) +
   geom_lineh() +
   geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9) +
-  geom_point() +
+  #geom_point() +
   scale_y_reverse() +
   facet_geochem_gridh(vars(param)) +
   labs(x = NULL, y = "Depth (cm)") +
@@ -179,9 +182,23 @@ S2_sand_plt <- ggplot(S2_sand_long, aes(x = depth, y = value)) +
   #ggtitle("S2 % sand")
 S2_sand_plt
 
-# Combine species abundance data and XRF plots
+## Plot XRF elements + % sand
 library(patchwork)
 
+plt <- wrap_plots(
+  S2_plot_geochem +
+    #layer_dendrogram(coniss, component = "CONISS", aes(y = depth)) +
+    theme(axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()) +
+    labs(y = NULL),
+  S2_sand_plt +
+    theme(axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()),
+  nrow = 1,
+  widths = c(3,0.5,1)
+)
+plt
+
+
+# Combine species abundance data and XRF plots
 plt <- wrap_plots(
   stratiplot + 
     theme(strip.background = element_blank(), strip.text.y = element_blank()),
@@ -191,20 +208,22 @@ plt <- wrap_plots(
     labs(y = NULL),
   S2_sand_plt +
     theme(axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()),
+  # PCA_components_plt +
+  #   theme(axis.text.y.left = element_blank(), axis.ticks.y.left = element_blank()),
   nrow = 1,
-  widths = c(3,1,0.3)
+  widths = c(3,1,0.5)
 )
-
 plt
 
-ggsave("outputs/S2_multiproxy.png", plt, height = 6, width = 10)
+
+#ggsave("outputs/S2_multiproxy.png", plt, height = 6, width = 10)
 
 ## Composite plot (stratiplots + PCA)
-library(cowplot)
-
-composite <- ggdraw() +
-  draw_plot(plot) +
-  draw_plot(PCA_XRF, x = 0.8, y = 0.7, width = .3, height = .3)
-composite
-
-ggsave("outputs/composite.png", composite, height = 6, width = 10)
+# library(cowplot)
+# 
+# composite <- ggdraw() +
+#   draw_plot(plot) +
+#   draw_plot(PCA_XRF, x = 0.8, y = 0.7, width = .3, height = .3)
+# composite
+# 
+# ggsave("outputs/composite.png", composite, height = 6, width = 10)
