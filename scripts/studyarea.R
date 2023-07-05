@@ -10,7 +10,7 @@ leaflet()  %>%
   addProviderTiles(providers$Esri.WorldImagery, group = "World Imagery") %>%
   addWMSTiles(
     wms,
-    layers = "delta_svi_sx",
+    layers = c("delta_svi_sx","delta_1580"),
     options = WMSTileOptions(format = "image/png", transparent = T)) %>% 
   # addRasterImage(cladium_pot, colors = pal, opacity=0.4) %>%
   # addLegend(pal = pal, values = values(cladium_pot), title = "Cladium spp. potential distribution") %>%
