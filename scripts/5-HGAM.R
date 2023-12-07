@@ -14,8 +14,9 @@ library(cluster)
 library(mgcv)
 
 ## Read in forams counts
-forams <- read.csv("datasets/S2/S2_counts_v2.csv", sep=";")[-1] %>%
-  mutate(depth=depth*100) #depth in cm
+forams <- read.csv("datasets/S2/S2_counts.csv", sep=";")[-1] %>%
+  mutate(depth=as.numeric(gsub(",", ".", gsub("\\.", "", depth))),
+         depth=depth*100) #replace commas with dots for decimals
 str(forams)
 
 # Read in forams taxa names groups
@@ -27,25 +28,6 @@ str(ages)
 colnames(ages) <- ages[1,]
 ages <- ages[-1,]
 ages <- data.frame(apply(ages, 2, as.numeric)) #transform to numeric
-
-
-## Calculate relative abundance
-# sample_info <- forams[, names(forams) %in% c("sample_id", "depth")]
-# forams <- forams[, !names(forams) %in% c("sample_id", "depth")]
-# forams[is.na(forams)] <- 0
-# 
-# # Transform to relative abundance
-# total <- apply(forams, 1, sum)
-# forams_red <- forams[total>0, ] 
-# 
-# forams <- forams/total*100
-# #
-# # ##Remove rare species
-# 
-# abund <- apply(forams, 2, max)
-# n.occur <- apply(forams>0, 2, sum)
-# forams <- forams[, n.occur>1 & abund>2] #more than 2% of RA and present in >1 sample
-
 
 #this is to transform to tidy format, calculate % and subset more common species
 new <- forams %>% 
@@ -85,32 +67,113 @@ core_counts_common <- new %>%
 
 #make it wide
 core_counts_wide_forams <- core_counts_common %>%
-  select(depth, mean, min,max, taxa, assemblage, count) %>%
+  select(depth, mean, min,max, taxa, count) %>%
   rename(age_calyr=mean) %>%
   rename(upper_age=min) %>%
   rename(lower_age=max) %>%
   spread(key = taxa, value = count) %>%
   arrange(depth) #sort by increasing time
 
-
 is.na(core_counts_wide_forams$age_calyr)
+median(diff(core_counts_wide_forams$upper_age),na.rm = TRUE)
 
 # here assign manually age to depths that join did not work for some reason
-core_counts_wide_forams[c(18,19),2] <- 1581
-core_counts_wide_forams[c(203,204,205),2] <- 8315
-core_counts_wide_forams[c(209),2] <- 8601
-core_counts_wide_forams[c(212),2] <- 8790
-core_counts_wide_forams[c(214),2] <- 9026
-core_counts_wide_forams[c(215,216),2] <- 9073
-core_counts_wide_forams[c(228,229),2] <- 9738
-core_counts_wide_forams[c(235,236),2] <- 9939
-core_counts_wide_forams[c(238,239),2] <- 10073
-core_counts_wide_forams[c(241,242),2] <- 10236
+core_counts_wide_forams[12,2] <- c(1581)
+core_counts_wide_forams[12,3] <- c(1351)
+core_counts_wide_forams[12,4] <- c(1785)
+
+core_counts_wide_forams[16,2] <- c(1808)
+core_counts_wide_forams[16,3] <- c(1589)
+core_counts_wide_forams[16,4] <- c(2051)
+
+core_counts_wide_forams[18,2] <- c(1961)
+core_counts_wide_forams[18,3] <- c(1721)
+core_counts_wide_forams[18,4] <- c(2240)
+
+core_counts_wide_forams[82,2] <- c(8315)
+core_counts_wide_forams[82,3] <- c(8089)
+core_counts_wide_forams[82,4] <- c(8601)
+
+core_counts_wide_forams[85,2] <- c(8601)
+core_counts_wide_forams[85,3] <- c(8295)
+core_counts_wide_forams[85,4] <- c(8970)
+
+core_counts_wide_forams[87,2] <- c(8790)
+core_counts_wide_forams[87,3] <- c(8445)
+core_counts_wide_forams[87,4] <- c(9190)
+
+core_counts_wide_forams[89,2] <- c(9026)
+core_counts_wide_forams[89,3] <- c(8664)
+core_counts_wide_forams[89,4] <- c(9431)
+
+core_counts_wide_forams[90,2] <- c(9073)
+core_counts_wide_forams[90,3] <- c(8700)
+core_counts_wide_forams[90,4] <- c(9500)
+
+core_counts_wide_forams[95,2] <- c(9738)
+core_counts_wide_forams[95,3] <- c(9364)
+core_counts_wide_forams[95,4] <- c(10202)
+
+core_counts_wide_forams[98,2] <- c(9939)
+core_counts_wide_forams[98,3] <- c(9586)
+core_counts_wide_forams[98,4] <- c(10354)
+
+core_counts_wide_forams[100,2] <- c(10073)
+core_counts_wide_forams[100,3] <- c(9737)
+core_counts_wide_forams[100,4] <- c(10483)
+
+core_counts_wide_forams[102,2] <- c(10236)
+core_counts_wide_forams[102,3] <- c(9935)
+core_counts_wide_forams[102,4] <- c(10635)
+
+
+# 
+# core_counts_wide_forams[c(18,19),2] <- 1581
+# core_counts_wide_forams[c(203,204,205),2] <- 8315
+# core_counts_wide_forams[c(209),2] <- 8601
+# core_counts_wide_forams[c(212),2] <- 8790
+# core_counts_wide_forams[c(214),2] <- 9026
+# core_counts_wide_forams[c(215,216),2] <- 9073
+# core_counts_wide_forams[c(228,229),2] <- 9738
+# core_counts_wide_forams[c(235,236),2] <- 9939
+# core_counts_wide_forams[c(238,239),2] <- 10073
+# core_counts_wide_forams[c(241,242),2] <- 10236
+# 
+# 
+# 
+# core_counts_wide_forams[c(203,204,205),2] <- 8315
+# core_counts_wide_forams[c(209),2] <- 8601
+# core_counts_wide_forams[c(212),2] <- 8790
+# core_counts_wide_forams[c(214),2] <- 9026
+# core_counts_wide_forams[c(215,216),2] <- 9073
+# core_counts_wide_forams[c(228,229),2] <- 9738
+# core_counts_wide_forams[c(235,236),2] <- 9939
+# core_counts_wide_forams[c(238,239),2] <- 10073
+# core_counts_wide_forams[c(241,242),2] <- 10236
+# 
+# core_counts_wide_forams[c(18,19),c(3,4)] <- c(1351,1785)
+# core_counts_wide_forams[c(203),c(3)] <- c(8089)
+# core_counts_wide_forams[c(203),c(4)] <- c(8601)
+# core_counts_wide_forams[c(204),c(3)] <- c(8089)
+# core_counts_wide_forams[c(204),c(4)] <- c(8601)
+# core_counts_wide_forams[c(205),c(3)] <- c(8089)
+# core_counts_wide_forams[c(205),c(4)] <- c(8601)
+# core_counts_wide_forams[c(209),c(3)] <- c(8295)
+# core_counts_wide_forams[c(209),c(4)] <- c(8970)
+# core_counts_wide_forams[c(212),c(3)] <- c(8445)
+# core_counts_wide_forams[c(212),c(4)] <- c(9190)
+# core_counts_wide_forams[c(214),c(3)] <- c(8664)
+# core_counts_wide_forams[c(214),c(4)] <- c(9431)
+# core_counts_wide_forams[c(215,216),c(3,4)] <- c(8700,9500)
+# core_counts_wide_forams[c(228,229),c(3,4)] <- c(9364,10202)
+# core_counts_wide_forams[c(235,236),c(3,4)] <- c(9586,10354)
+# core_counts_wide_forams[c(238,239),c(3,4)] <- c(9737,10483)
+# core_counts_wide_forams[c(241,242),c(3,4)] <- c(9935,10635)
 
 
 #Prepare the data
-agedepth <- core_counts_wide_forams[, names(core_counts_wide_forams) %in% c("depth", "age_calyr", "assemblage")] 
-forams <- core_counts_wide_forams[, !names(core_counts_wide_forams) %in% c("depth", "age_calyr", "assemblage")]
+agedepth <- core_counts_wide_forams[, names(core_counts_wide_forams) %in% c("depth", "age_calyr", "upper_age","lower_age")] 
+forams <- core_counts_wide_forams[, !names(core_counts_wide_forams) %in% c("depth", "age_calyr", "upper_age","lower_age")]
 forams[is.na(forams)] <- 0
 
 #Select most common species 
@@ -121,8 +184,8 @@ forams_red <- forams[, n.occur > (dim(forams)[1])*criteria] #
 forams <- cbind(agedepth, forams_red)
 
 #this is to transform to tidy format, calculate % and subset more common species
-diat_data <- forams %>% 
-  gather(key = taxa, value = count, -depth, -assemblage, -age_calyr) %>%
+forams_data <- forams %>% 
+  gather(key = taxa, value = count, -depth, -age_calyr, -upper_age, -lower_age) %>%
   group_by(depth) %>%
   mutate(total_sample = sum(count)) %>% 
   filter(!total_sample == "0") %>% #this is to remove empty samples
@@ -134,31 +197,31 @@ diat_data <- forams %>%
   filter(!is.na(elapsedTime)) %>%
   mutate(spp = factor(taxa)) 
 
-levels(diat_data$spp)
+levels(forams_data$spp)
 
 #model S HGAM : similar smootheness between groups (spp) without global smooth 
 set.seed(10) #set a seed so this is repeatable
-diatom_gam_S <- gam(count ~ s(negAge, spp, k=20, bs="fs") + offset(log_total_counts),
+gam_S <- gam(count ~ s(negAge, spp, k=30, bs="fs") + offset(log_total_counts),
                     weights = elapsedTime/mean(elapsedTime),
-                    data=diat_data, family = nb, #places notes at the deciles of sample ages
+                    data=forams_data, family = nb, 
                     method = "REML")
 
-summary(diatom_gam_S)
-gam.check(diatom_gam_S)
-draw(diatom_gam_S)
+summary(gam_S)
+gam.check(gam_S)
+draw(gam_S)
 
 #model I HGAM: different smootheness for each taxa without global smooth
-diatom_gam_I<- gam(count ~ s(negAge, by=spp, k=20, bs="fs") +
+gam_I<- gam(count ~ s(negAge, by=spp, k=20, bs="fs") +
                      s(spp, bs="re") + offset(log_total_counts),
                    weights = elapsedTime/mean(elapsedTime),
-                   data=diat_data, family = nb, #places notes at the deciles of sample ages
+                   data=forams_data, family = nb, #places notes at the deciles of sample ages
                    method = "REML")
 
-gam.check(diatom_gam_I)
-draw(diatom_gam_I)
+gam.check(gam_I)
+draw(gam_I)
 
 #Compare different model fits using AIC
-AIC_table <- AIC(diatom_gam_S, diatom_gam_I)%>%
+AIC_table <- AIC(gam_S, gam_I)%>%
   rownames_to_column(var= "Model")%>%
   mutate(data_source = rep(c("diatom_data")))%>%
   group_by(data_source)%>%
@@ -169,73 +232,62 @@ AIC_table <- AIC(diatom_gam_S, diatom_gam_I)%>%
             .funs = funs(round,.args = list(digits=0)))
 
 #Create synthetic data to predict over a range of ages
-diat_plot_data <- with(diat_data, as_tibble(expand.grid(negAge = seq(min(diat_data$negAge), max(diat_data$negAge)),
-                                                        spp = factor(levels(diat_data$spp)),
+forams_plot_data <- with(forams_data, as_tibble(expand.grid(negAge = seq(min(forams_data$negAge), max(forams_data$negAge)),
+                                                        spp = factor(levels(forams_data$spp)),
                                                         log_total_counts = mean(log_total_counts))))
 
-# diat_modS_fit <- predict(diatom_gam_S, 
-#                          newdata = diat_plot_data,
-#                          se.fit = TRUE)
-
-diat_modI_fit <- predict(diatom_gam_I,
-                         newdata = diat_plot_data,
-                         se.fit = TRUE)
+modS_fit <- predict(gam_S, newdata = forams_plot_data, se.fit = TRUE)
+modI_fit <- predict(gam_I, newdata = forams_plot_data, se.fit = TRUE)
 
 #non-shared trends
-diat_plot_data$modS_fit <- as.numeric(diat_modS_fit$fit)
-diat_plot_data$modI_fit <- as.numeric(diat_modI_fit$fit)
+forams_plot_data$modS_fit <- as.numeric(modS_fit$fit)
+forams_plot_data$modI_fit <- as.numeric(modI_fit$fit)
 
 # comparing non-shared trends
-diat_plot_data <- gather(diat_plot_data, key=model, value=fit, modS_fit, modI_fit)
+forams_plot_data <- gather(forams_plot_data, key=model, value=fit, modS_fit, modI_fit)
 
-diat_plot_data <- mutate(diat_plot_data, se= c(as.numeric(diat_modS_fit$se.fit),
-                                               as.numeric(diat_modI_fit$se.fit)),
+forams_plot_data <- mutate(forams_plot_data, se= c(as.numeric(modS_fit$se.fit),
+                                               as.numeric(modI_fit$se.fit)),
                          upper = exp(fit + (2 * se)),
                          lower = exp(fit - (2 * se)),
                          fit   = exp(fit))
-
-# For only one model
-diat_plot_data <- gather(diat_plot_data, key=model, value=fit, modI_fit)
-diat_plot_data <- mutate(diat_plot_data, se= c(as.numeric(diat_modI_fit$se.fit)),
-                         upper = exp(fit + (2 * se)),
-                         lower = exp(fit - (2 * se)),
-                         fit   = exp(fit))
-diat_plot_model_labels <- paste("Model", c("I"))
 
 #Plot the model output for non-shared trends, with means plus standard deviations for each model.
-diat_plot_model_labels <- paste("Model", c("S", "I"))
-diat_plot_model_labels <- factor(diat_plot_model_labels, levels = diat_plot_model_labels)
+forams_plot_model_labels <- paste("Model", c("S", "I"))
+forams_plot_model_labels <- factor(forams_plot_model_labels, levels = forams_plot_model_labels)
 
 #non-shared trends
 theme_set(theme_bw())
 theme_update(panel.grid = element_blank())
 
-diat_plot <- ggplot(diat_plot_data) +
+forams_plot <- ggplot(forams_plot_data) +
   facet_wrap(~spp, nrow = 4,scales = "free_y")+
   geom_ribbon(aes(x=negAge,
                   ymin = lower,
                   ymax = upper,
                   fill = model),
               alpha=0.2)+
-  geom_point(data= diat_data, aes(x = negAge, y = count), size=0.06) +
+  geom_point(data= forams_data, aes(x = negAge, y = count), size=0.06) +
   geom_line(aes(x = negAge, y = fit, color = model))+
   labs(y = "Absolute counts", x = "Age (cal yr BP)") +
   scale_fill_brewer(name = "", palette = "Dark2",
-                    labels = diat_plot_model_labels) +
+                    labels = forams_plot_model_labels) +
   scale_colour_brewer(name = "",
-                      palette = "Dark2", labels = diat_plot_model_labels)+
+                      palette = "Dark2", labels = forams_plot_model_labels)+
   theme(legend.position = "top",
         strip.text = element_text(size=10))
 
-diat_plot
+forams_plot
+
+## sAVE THE PLOT
+ggsave("outptus/forams-HGAM.png", forams_plot, height = 8, width = 10)
 
 ## save model results for later use
-write.csv(diat_plot_data, "outputs/diatoms-HGAMs-fitted-values.csv", row.names = FALSE)
+write.csv(forams_plot_data, "outputs/forams-HGAMs-fitted-values.csv", row.names = FALSE)
 
-```
 
 ##Derivatives and posterior distribution simulation
-```{r diatom derivatives}
+
 # Eric's code
 #Function for calculating first derivatives of time series given a before,
 #after, and delta step size
@@ -246,26 +298,26 @@ calc_1st_deriv = function(fit_before, fit_after,delta) {
 set.seed(10) #set a seed so this is repeatable
 n_sims = 250
 
-n_length = 200
+n_length = 180
 
-years <- seq(min(diat_plot_data$negAge),
-             max(diat_plot_data$negAge),
+years <- seq(min(forams_plot_data$negAge),
+             max(forams_plot_data$negAge),
              length.out = n_length)
 
 diff(years)
-#model <- diatom_gam_S
 
-model <- diatom_gam_I
+model <- gam_S
+model <- gam_I
 
-#pred <- diat_modS_fit
-pred <- diat_modI_fit
+pred <- modS_fit
+pred <- modI_fit
 
 # Generate multivariate normal simulations of model coefficients
 random_coefs <- t(rmvn(n_sims, mu = coef(model),V = vcov(model)))
 
-confint_sims <- crossing(spp=unique(diat_plot_data$spp),
-                         negAge = seq(min(diat_plot_data$negAge),
-                                      max(diat_plot_data$negAge),
+confint_sims <- crossing(spp=unique(forams_plot_data$spp),
+                         negAge = seq(min(forams_plot_data$negAge),
+                                      max(forams_plot_data$negAge),
                                       length.out = n_length),
                          log_total_counts=0)
 
@@ -342,4 +394,4 @@ sd_plot
 
 
 ## save derivative summaries for later use
-write.csv(deriv_summaries, "outputs/diatom-derivatives.csv", row.names = FALSE)
+write.csv(deriv_summaries, "outputs/forams-derivatives.csv", row.names = FALSE)

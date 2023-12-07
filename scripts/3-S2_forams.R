@@ -16,15 +16,19 @@ library(tidypaleo) #(https://fishandwhistle.net/post/2018/stratigraphic-diagrams
 library(cluster)
 
 ## Read in forams counts
-forams <- read.csv("datasets/S2/S2_counts_v2.csv", sep=";")[-1] %>%
-  mutate(depth=depth*100) #depth in cm
+forams <- read.csv("datasets/S2/S2_counts.csv", sep=";")[-1] %>%
+  mutate(depth=as.numeric(gsub(",", ".", gsub("\\.", "", depth))),
+         depth=depth*100) #replace commas with dots for decimals
 str(forams)
 
 # Read in forams taxa names groups
 changes <- read.csv("datasets/S2/nms_taxa_groups.csv")
 
 # Read in %sand
-S2_sand <- read.csv("datasets/S2/S2_sand_v2.csv", sep = ";")
+S2_sand <- read.csv("datasets/S2/S2_sand.csv", sep = ";") %>%
+  mutate(sand=as.numeric(gsub(",", ".", gsub("\\.", "", sand))),
+         depth=as.numeric(gsub(",", ".", gsub("\\.", "", depth))),
+         depth=depth*100)
 str(S2_sand)
 
 # Read in age-depth model
@@ -34,16 +38,9 @@ colnames(ages) <- ages[1,]
 ages <- ages[-1,]
 ages <- data.frame(apply(ages, 2, as.numeric)) #transform to numeric
 
-
-# replace commas to points
-S2_sand$depth <- as.numeric(gsub(",", ".", gsub("\\.", "", S2_sand$depth))) #replace commas with dots for decimals
-S2_sand <- S2_sand %>%
-  mutate(depth=depth*100)
-S2_sand$sand <- as.numeric(gsub(",", ".", gsub("\\.", "", S2_sand$sand))) #replace commas with dots for decimals
-
 # Read in XRF data
 S2_geochem_data <- read.csv("datasets/S2/S2_XRF.csv") %>%
-  dplyr::rename(depth=ï..depth) %>%
+  #dplyr::rename(depth=ï..depth) %>%
   mutate(Sr_Rb=Sr/Rb) %>% #unweathered terrestrial fraction
   mutate(lnCa_Ti=log(Ca/Ti))%>% #biogenic CaCO3 vs detrital input
   mutate(Si_Zr=Si/Zr) %>%
@@ -115,38 +112,45 @@ core_counts_wide_forams <- core_counts_common %>%
   spread(key = taxa, value = relative_abundance_percent) %>%
   arrange(depth) #sort by increasing time
 
-
 is.na(core_counts_wide_forams$age_calyr)
 
 # here assign manually age to depths that join did not work for some reason
-core_counts_wide_forams[c(18,19),2] <- 1581
-core_counts_wide_forams[c(203,204,205),2] <- 8315
-core_counts_wide_forams[c(209),2] <- 8601
-core_counts_wide_forams[c(212),2] <- 8790
-core_counts_wide_forams[c(214),2] <- 9026
-core_counts_wide_forams[c(215,216),2] <- 9073
-core_counts_wide_forams[c(228,229),2] <- 9738
-core_counts_wide_forams[c(235,236),2] <- 9939
-core_counts_wide_forams[c(238,239),2] <- 10073
-core_counts_wide_forams[c(241,242),2] <- 10236
-
+core_counts_wide_forams[c(22,23),2] <- 1581
+core_counts_wide_forams[c(31,32),2] <- 1808
+core_counts_wide_forams[c(36,37),2] <- 1961
+core_counts_wide_forams[c(218,219,220),2] <- 8315
+core_counts_wide_forams[c(224),2] <- 8601
+core_counts_wide_forams[c(227),2] <- 8790
+core_counts_wide_forams[c(229),2] <- 9026
+core_counts_wide_forams[c(230,231),2] <- 9073
+core_counts_wide_forams[c(243,244),2] <- 9738
+core_counts_wide_forams[c(250,251),2] <- 9939
+core_counts_wide_forams[c(253,254),2] <- 10073
+core_counts_wide_forams[c(256,257),2] <- 10236
 
 #do coniss to add statistically significant stratigraphic zones
 core_counts_wide_forams[is.na(core_counts_wide_forams)] <- 0
 
-foramsHel <- decostand(core_counts_wide_forams[,4:ncol(core_counts_wide_forams)], method="hellinger")
+core_counts_wide_forams_unique <- core_counts_wide_forams %>%
+  select(-assemblage) %>%
+  distinct(depth, .keep_all=TRUE)
+
+core_counts_wide_forams_unique[is.na(core_counts_wide_forams_unique)] <- 0
+
+foramsHel <- decostand(core_counts_wide_forams_unique[,3:ncol(core_counts_wide_forams_unique)], 
+                       method="hellinger")
 diss <- vegdist(foramsHel, method="bray")
 clust <- chclust(diss, method="coniss")
 bstick(clust)
 
 zones <- cutree(clust, k=3) #k=groups
 locate <- cumsum(rle(zones)$lengths)+1
-zones <- core_counts_wide_forams[locate, ][,2] #by age
+zones <- core_counts_wide_forams_unique[locate, ][,2] #by age #ULL AQUI pq tinc la matriu de dades doblada per assemblage
 zones <- zones$age_calyr
 
 ## Plot S2 forams record 
-theme_set(theme_bw(12))
-#theme_set(theme_paleo())
+#theme_set(theme_bw(12))
+theme_set(theme_paleo())
 
 stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y = mean, colour=assemblage)) +
   geom_col_segsh(size=1.3) +
@@ -160,7 +164,6 @@ stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y =
   geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9)
 stratiplot
 
-
 ## XRF
 #do coniss on XRF to add statistically significant stratigraphic zones
 S2_geochem_data <- S2_geochem_data %>%
@@ -173,10 +176,10 @@ diss <- vegdist(XRFHel, method="bray")
 clust <- chclust(diss, method="coniss")
 bstick(clust)
 
-zones <- cutree(clust, k=4) #k=groups
+zones <- cutree(clust, k=3) #k=groups
 locate <- cumsum(rle(zones)$lengths)+1
 zones <- S2_geochem_data[locate, ][,ncol(S2_geochem_data)]
-zones[1] <- NA
+#zones[1] <- NA
 #zones <- zones$depth
 
 ## Plot XRF
@@ -192,7 +195,7 @@ S2_plot_geochem <- S2_geochem_long %>%
   geom_point() +
   scale_y_reverse() +
   facet_geochem_gridh(vars(param)) +
-  labs(x = NULL, y = "Depth (cm)") +
+  labs(x = NULL, y = "Age (cal yr BP)") +
   theme(axis.text.x=element_text(size = 8))
 S2_plot_geochem
 
@@ -260,7 +263,7 @@ plt <- wrap_plots(
 )
 plt
 
-ggsave("outputs/S2_multiproxy_new.png", plt, height = 6, width = 10)
+ggsave("outputs/S2_multiproxy_new_18092023.png", plt, height = 6, width = 10)
 
 ## Composite plot (stratiplots + PCA)
 # library(cowplot)
