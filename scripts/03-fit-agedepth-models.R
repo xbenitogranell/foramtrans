@@ -1,6 +1,6 @@
 
 rm(list=ls(all=TRUE))
-dev.off()
+#dev.off()
 #unload all loaded packages
 pacman::p_unload(pacman::p_loaded(), character.only = TRUE)
 
@@ -13,15 +13,22 @@ mix.ccurves(proportion = 0.5, cc1 = "3Col_intcal13.14C",
            cc2 = "3Col_marine20.14C", name = "mixed.14C", dirname = "Bacon_runs")
 
 #Carlet core
-Bacon("carlet", thick = 5, prob = 0.95, sep = ";",
-      d.min = 74, d.max = 1620, d.by = 10, unit = "cm", cc=2, acc.shape = 2, 
-      acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
+Bacon("carlet", thick =10, prob = 0.95, sep = ",",
+      d.min = 74, d.max = 1620, d.by = 1, unit = "cm", cc=2, acc.shape = 2, 
+      acc.mean = 20, mem.strength = 10, mem.mean = 0.5)
 
-  ## mixed calibration curve
-  Bacon(core = "carlet", thick = 5, prob = 0.95,
-        d.min = 74, d.max = 1620, d.by = 10, unit = "cm", cc=4, cc4="mixed.14C", acc.shape = 2, 
-        acc.mean = 30, mem.strength = 4, mem.mean = 0.7)
+#St Jaume core
+stjaume_14c <- read.csv("Bacon_runs/stjaume/stjaume.csv")
 
+stjaume_14c_goodates <- stjaume_14c[-c(8,9,10),]
+#write.csv(stjaume_14c_goodates[-1],"Bacon_runs/stjaume_v2/stjaume_v2.csv")
+
+Bacon("stjaume_v2", thick = 10, prob = 0.95, sep = ",",
+        d.min = 414, d.max = 1858,
+        d.by = 1, unit = "cm", cc=2, acc.shape = 1.5, 
+        acc.mean = 30, mem.strength = 10, mem.mean = 0.5)
+  
+  
 #S2 core
 Bacon("S2_core_v2", thick = 20, prob = 0.95, sep = ";",
       d.by = 1, unit = "cm", acc.shape = 1.5, 
@@ -30,12 +37,10 @@ Bacon("S2_core_v2", thick = 20, prob = 0.95, sep = ";",
 add.dates(9550, 50, 3810)
 
 
-
-
 # set parameters
-thick<-20
+thick<-10
 d.by<-1
-core.name="S2_core_v2"
+core.name="stjaume_v2"
 acc.mean=20
 acc.shape=1.5
 mem.strength=10
@@ -55,7 +60,7 @@ x <- Bacon(
   plot.pdf=TRUE,
   depths.file=FALSE,
   normal=FALSE,
-  rotate.axes=TRUE)
+  rotate.axes=FALSE)
 
 
 #functions to compute weighted mean and standard deviation (from SDMTools)

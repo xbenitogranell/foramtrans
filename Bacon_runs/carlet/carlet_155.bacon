@@ -1,9 +1,9 @@
-## Ran on Mon May 17 13:42:46 2021 
+## Ran on Tue Dec 26 10:51:51 2023 
 
 Cal 0 : ConstCal;
-Cal 1 : IntCal20, 0;
-Cal 2 : Marine20;
-Cal 3 : SHCal20, 0;
+Cal 1 :  IntCal20 ,  0 ;
+Cal 2 :  Marine20 ;
+Cal 3 :  SHCal20 ,  0 ;
 
 ##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc
 Det 0 : Carlet_8 , 1560, 30, 74,  0,  0,  3,  4,  2;
@@ -22,4 +22,4 @@ Det 12 : Carlet_52 , 7422, 30, 1570,  0,  0,  3,  4,  2;
 Det 13 : Carlet_54 , 7502, 30, 1620,  0,  0,  3,  4,  2;
 
 ##		 K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed
-Bacon 0: FixT, 155,  -71,  1e+06,  1596,  1559,  2.8,  1.2,  2,  0.4, 74, 1624, 224269;
+Bacon 0: FixT, 155,  -73,  1e+06,  1564,  1607,  5,  5,  2,  0.4, 74, 1624, 506599;

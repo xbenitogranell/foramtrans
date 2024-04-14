@@ -22,7 +22,7 @@ forams <- read.csv("datasets/S2/S2_counts.csv", sep=";")[-1] %>%
 str(forams)
 
 # Read in forams taxa names groups
-changes <- read.csv("datasets/S2/nms_taxa_groups.csv")
+nms <- read.csv("outputs/nms_old_new.csv", na.strings = "") #handle empty cells of foraminifera indicator spp
 
 # Read in %sand
 S2_sand <- read.csv("datasets/S2/S2_sand.csv", sep = ";") %>%
@@ -72,12 +72,14 @@ names(S2_geochem_data$mean)
 #this is to transform to tidy format, calculate % and subset more common species
 new <- forams %>% 
   gather(key = taxa, value = count, -depth, -sample_id) %>%
-  mutate(assemblage = plyr::mapvalues(taxa, from = changes[,1], to = changes$wall_type)) %>%
+  mutate(taxa= plyr::mapvalues(taxa, from=nms$old, to=nms$new)) %>%
+  mutate(assemblage = plyr::mapvalues(taxa, from = nms[,1], to = nms$wall_type)) %>%
+  mutate(indspp = plyr::mapvalues(taxa, from = nms[,1], to = nms$habitat)) %>%
   mutate(assemblage=recode(assemblage,
                            '1'="agglutinated",
                            '2'="hyaline",
                            '3'="porcellanous")) %>%
-  group_by(depth, taxa, assemblage) %>%
+  group_by(depth, taxa, assemblage, indspp) %>%
   summarise(count = sum(count)) %>%
   filter(!count == "0" ) %>% #this is to remove empty samples (rows)
   #filter(!upper_age==0.0) %>% #this is to drop extraneous ages
@@ -102,20 +104,25 @@ core_counts_common <- new %>%
   filter(taxa %in% core_common_taxa) %>%
   mutate(taxa = factor(taxa, levels = core_common_taxa)) %>%
   arrange(taxa) %>%
-  mutate(n_valves = ifelse(total_sample < 100, "low", "high")) #here label samples if nvalves >100 or higher
+  mutate(n_valves = ifelse(total_sample < 100, "low", "high")) %>%
+  filter(!is.na(indspp))#here label samples if nvalves >100 or higher
   #drop_na()
 
 #make it wide
 core_counts_wide_forams <- core_counts_common %>%
-  select(depth, mean, taxa, assemblage, relative_abundance_percent) %>%
+  select(depth, mean, taxa, assemblage, indspp, relative_abundance_percent) %>%
   rename(age_calyr=mean) %>%
   spread(key = taxa, value = relative_abundance_percent) %>%
   arrange(depth) #sort by increasing time
 
 is.na(core_counts_wide_forams$age_calyr)
+is.na(core_counts_wide_forams$indspp)
 
 # here assign manually age to depths that join did not work for some reason
 core_counts_wide_forams[c(22,23),2] <- 1581
+
+core_counts_wide_forams[c(57,58,59,60,61,62),2] <- 1581
+
 core_counts_wide_forams[c(31,32),2] <- 1808
 core_counts_wide_forams[c(36,37),2] <- 1961
 core_counts_wide_forams[c(218,219,220),2] <- 8315
@@ -152,7 +159,7 @@ zones <- zones$age_calyr
 #theme_set(theme_bw(12))
 theme_set(theme_paleo())
 
-stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y = mean, colour=assemblage)) +
+stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y = mean, colour=indspp)) +
   geom_col_segsh(size=1.3) +
   scale_y_reverse() +
   facet_abundanceh(vars(taxa), rotate_facet_labels = 70) +
@@ -161,7 +168,7 @@ stratiplot <- ggplot(core_counts_common, aes(x = relative_abundance_percent, y =
   ggtitle("S2 core") +
   theme (legend.position = "bottom") +
   theme(axis.text.x=element_text(size = 8)) +
-  geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9)
+  #geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9)
 stratiplot
 
 ## XRF
@@ -178,7 +185,7 @@ bstick(clust)
 
 zones <- cutree(clust, k=3) #k=groups
 locate <- cumsum(rle(zones)$lengths)+1
-zones <- S2_geochem_data[locate, ][,ncol(S2_geochem_data)]
+zones_XRF <- S2_geochem_data[locate, ][,ncol(S2_geochem_data)]
 #zones[1] <- NA
 #zones <- zones$depth
 
@@ -191,7 +198,7 @@ S2_plot_geochem <- S2_geochem_long %>%
   filter(param %in% c("Ca", "Si", "S", "Fe", "Zr")) %>%
   ggplot(aes(x = value, y = age_calyr)) +
   geom_lineh() +
-  geom_hline(yintercept = zones, col = "black", lty = 2, alpha = 0.9) +
+  geom_hline(yintercept = zones_XRF, col = "black", lty = 2, alpha = 0.9) +
   geom_point() +
   scale_y_reverse() +
   facet_geochem_gridh(vars(param)) +
@@ -216,6 +223,14 @@ S2_sand_long <- S2_sand %>%
   gather(key = param, value = value, -depth) %>%
   left_join(ages[c("depth", "mean")], by="depth")
 
+sand_depth <- c(66,70,72,136,139,141,143,144,149,152,154,156)
+ages_corr <- c(1581,1808,1961,8315,8601,8790,9026,9073,9738,9939,10073,10236)
+
+S2_sand_long$mean[sand_depth] <- ages_corr
+
+S2_sand_nonmissing <- S2_sand_long %>%
+  arrange(depth)
+
 S2_sand_plt <- ggplot(S2_sand_long, aes(x = mean, y = value)) +
   # geom_areah() +
   geom_line() +
@@ -229,6 +244,8 @@ S2_sand_plt <- ggplot(S2_sand_long, aes(x = mean, y = value)) +
   labs(x = NULL, y = "sand (%)")
   #ggtitle("S2 % sand")
 S2_sand_plt
+
+write.csv(S2_sand_long, "outputs/S2_sand_age.csv")
 
 ## Plot XRF elements + % sand
 library(patchwork)
@@ -263,7 +280,7 @@ plt <- wrap_plots(
 )
 plt
 
-ggsave("outputs/S2_multiproxy_new_18092023.png", plt, height = 6, width = 10)
+#ggsave("outputs/S2_multiproxy_new_18092023.png", plt, height = 6, width = 10)
 
 ## Composite plot (stratiplots + PCA)
 # library(cowplot)

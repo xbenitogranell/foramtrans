@@ -1,0 +1,25 @@
+## Ran on Tue Dec 26 11:28:24 2023 
+
+Cal 0 : ConstCal;
+Cal 1 :  IntCal20 ,  0 ;
+Cal 2 :  Marine20 ;
+Cal 3 :  SHCal20 ,  0 ;
+
+##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc
+Det 0 : Carlet_8 , 1560, 30, 74,  0,  0,  3,  4,  2;
+Det 1 : Carlet_10 , 1600, 30, 142,  0,  0,  3,  4,  2;
+Det 2 : Carlet_11 , 1630, 30, 167,  0,  0,  3,  4,  2;
+Det 3 : Carlet_12 , 1700, 30, 183,  0,  0,  3,  4,  2;
+Det 4 : Carlet_13 , 1770, 30, 190,  0,  0,  3,  4,  2;
+Det 5 : Carlet_16 , 2000, 30, 378,  0,  0,  3,  4,  2;
+Det 6 : Carlet_30 , 2980, 30, 1041,  0,  0,  3,  4,  2;
+Det 7 : Carlet_36 , 4062, 30, 1185,  0,  0,  3,  4,  2;
+Det 8 : Carlet_37 , 4162, 30, 1198,  0,  0,  3,  4,  2;
+Det 9 : Carlet_44 , 6262, 30, 1359,  0,  0,  3,  4,  2;
+Det 10 : Carlet_48 , 7270, 30, 1473,  0,  0,  3,  4,  2;
+Det 11 : Carlet_50 , 7402, 30, 1523,  0,  0,  3,  4,  2;
+Det 12 : Carlet_52 , 7422, 30, 1570,  0,  0,  3,  4,  2;
+Det 13 : Carlet_54 , 7502, 30, 1620,  0,  0,  3,  4,  2;
+
+##		 K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed
+Bacon 0: FixT, 156,  -73,  1e+06,  1573,  1570,  5,  5,  2,  0.4, 74, 1634, 142415;

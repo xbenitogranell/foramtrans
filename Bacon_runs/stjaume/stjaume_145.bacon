@@ -1,0 +1,23 @@
+## Ran on Sun Dec 24 12:46:42 2023 
+
+Cal 0 : ConstCal;
+Cal 1 :  IntCal20 ,  0 ;
+Cal 2 :  Marine20 ;
+Cal 3 :  SHCal20 ,  0 ;
+
+##   id.   age    std   depth  delta.R  delta.STD     t.a   t.b   cc
+Det 0 : SantJaume_13 , 560, 40, 414,  0,  0,  3,  4,  2;
+Det 1 : SantJaume_18 , 680, 40, 524,  0,  0,  3,  4,  2;
+Det 2 : SantJaume_19 , 870, 40, 549,  0,  0,  3,  4,  2;
+Det 3 : SantJaume_39 , 890, 40, 1030,  0,  0,  3,  4,  2;
+Det 4 : SantJaume_45 , 1120, 40, 1143,  0,  0,  3,  4,  2;
+Det 5 : SantJaume_57 , 1250, 40, 1408,  0,  0,  3,  4,  2;
+Det 6 : SantJaume_58 , 1360, 40, 1428,  0,  0,  3,  4,  2;
+Det 7 : SantJaume_61 , 1310, 40, 1488,  0,  0,  3,  4,  2;
+Det 8 : SantJaume_63 , 1870, 40, 1549,  0,  0,  3,  4,  2;
+Det 9 : SantJaume_69 , 1240, 40, 1731,  0,  0,  3,  4,  2;
+Det 10 : SantJaume_71 , 1730, 40, 1771,  0,  0,  3,  4,  2;
+Det 11 : SantJaume_75 , 1760, 40, 1858,  0,  0,  3,  4,  2;
+
+##		 K   MinAge   MaxAge   th0   th0p   w.a   w.b   alpha  beta  dmin  dmax seed
+Bacon 0: FixT, 145,  -73,  1e+06,  560,  522,  2.8,  1.2,  2,  2, 414, 1864, 251176;

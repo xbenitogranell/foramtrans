@@ -1,16 +1,37 @@
 ## PCA-Nipals XRF
 library(ade4)
+#remotes::install_github("gavinsimpson/ggvegan")
+library(ggvegan)
+
+# Read in age-depth model
+ages <- read.table("Bacon_runs/S2_core_v2/S2_core_v2_104_ages.txt")
+str(ages)
+colnames(ages) <- ages[1,]
+ages <- ages[-1,]
+ages <- data.frame(apply(ages, 2, as.numeric)) #transform to numeric
 
 # Read in XRF data
 S2_geochem_data <- read.csv("datasets/S2/S2_XRF.csv") %>%
-  dplyr::select(-LE) %>%
-  dplyr::rename(depth=ï..depth )
-
+  #dplyr::rename(depth=ï..depth) %>%
+  mutate(Sr_Rb=Sr/Rb) %>% #unweathered terrestrial fraction
+  mutate(lnCa_Ti=log(Ca/Ti))%>% #biogenic CaCO3 vs detrital input
+  mutate(Si_Zr=Si/Zr) %>%
+  mutate(depth=depth*100) %>%
+  left_join(ages[c("depth", "mean")], by=c("depth")) 
 str(S2_geochem_data)
 
-# Prepare data
-PCA.data <- data.frame(scale(S2_geochem_data[,2:ncol(S2_geochem_data)])) #scale variables
+vec <- c(48,49,53,54,90,92,95,97,100,102,105,107)
+ages_corr <- c(1422,1581,2189,2340,8315,8601,9026,9313,9738,9939,10236,10433)
 
+S2_geochem_data$mean[vec] <- ages_corr
+names(S2_geochem_data$mean)
+
+# Prepare data
+PCA.data <- data.frame(scale(S2_geochem_data[,2:22])) #scale variables
+
+PCA.data <- PCA.data %>%
+  select(-c("LE", "Sr_Rb", "lnCa_Ti", "Si_Zr"))
+  
 #Perform PCA with NIPALS algorithm
 PCA.nipals <- nipals(PCA.data, nf = 2, rec = FALSE, niter = 1000, tol = 1e-09)
 
@@ -58,9 +79,7 @@ colnames(Component.coefficient.matrix) <- c("Variable", "Component 1", "Componen
 colnames(PCA.nipals$li) <- c("PCA1", "PCA2")
 Factor.scores <- data.frame(cbind(PCA.data, PCA.nipals$li))
 Factor.scores$depth <- S2_geochem_data$depth
-
-
-
+Factor.scores$age <- S2_geochem_data$mean
 
 #Create data frame with site scores and regions
 #region <- site.time[1:21,] #lake regions of the modern diatom dataset
@@ -88,7 +107,7 @@ variables_tbl <- mutate(data.frame(cbind(comp1, comp2)), varlbls = as.character(
 pca_variables_plt <- ggplot(variables_tbl, aes(comp1,comp2, label=varlbls)) + 
   xlab("PCA1") + ylab("PCA2") +
   geom_point() +
-  geom_text_repel(colour="black", size=3) +
+  #geom_text_repel(colour="black", size=3) +
   geom_segment(data=variables_tbl, aes(x = 0, y = 0, xend = comp1*0.9, yend = comp2*0.9), arrow = arrow(length = unit(1/2, 'picas')), color = "grey30") +
   geom_vline(aes(xintercept = 0), linetype = "solid", colour="grey") +
   geom_hline(aes(yintercept = 0), linetype = "solid", colour="grey") +
@@ -98,9 +117,18 @@ pca_variables_plt
 ### Plot CCAs (ggplot)
 ## Run PCA with vegan
 #check rows with NA and remove
+# Prepare data
+PCA.data <- data.frame(scale(S2_geochem_data[,2:22])) #scale variables
+
+PCA.data <- PCA.data %>%
+  select(-c("LE", "Sr_Rb", "lnCa_Ti", "Si_Zr"))
+
 row.has.na <- apply(PCA.data, 1, function(x){any(is.na(x))})
 sum(row.has.na)
 PCA.data <- na.omit(PCA.data)
+
+# extract age variable after removing NAs from XRF data using the rownames vector as position
+agesXRF <- S2_geochem_data[rownames(S2_geochem_data) %in% row.names(PCA.data),]$mean
 
 # Run PCA with vegan
 modPCA <- rda(PCA.data, scale=TRUE)
@@ -124,12 +152,16 @@ axis.expl <- function(mod, axes = 1:2) {
 # Fortify the ordinations for ggploting
 ford <- fortify(modPCA, axes = 1:2)  # fortify the ordination
 take <- c('PC1', 'PC2')  # which columns contain the scores we want
-sites <- subset(ford, Score == 'sites')  # take only biplot arrow scores
-arrows <- subset(ford, Score == 'species')  # take species scores
+sites <- subset(ford, score == 'sites')  # take only biplot arrow scores
+sites$age <- agesXRF
+
+PCA_scrs_XRF <- cbind(data.frame(sites, PCA.data))
+write.csv(PCA_scrs_XRF,'outputs/PCA_scrs_XRF.csv')
+arrows <- subset(ford, score == 'species')  # take species scores
 
 ## multiplier for arrows to scale them to the plot range
-mul <- ggvegan:::arrowMul(arrows[, take],
-                          subset(ford, select = take, Score == 'species'))
+mul <- ggvegan:::arrow_mul(arrows[, take],
+                          subset(ford, select = take, score == 'species'))
 arrows[, take] <- arrows[, take] * mul  # scale biplot arrows
 
 ford[locate, ]
@@ -137,21 +169,19 @@ ford[locate, ]
 #plot
 PCA_XRF <- ggplot() +
   theme_bw()+
-  geom_point(data = subset(ford, Score == 'sites'),
-             mapping = aes(x = PC1, y = PC2)) +
-  # geom_text(data = subset(ford, Score == 'sites'),
-  #           mapping = aes(label=Label, x = CCA1, y = CCA2),size=3) + 
+  geom_point(data = sites, aes(x = PC1, y = PC2, colour=age)) +
+  scale_color_gradient2() +
   geom_segment(data=arrows,
                mapping = aes(x = 0, y = 0, xend = PC1, yend = PC2),
                arrow = arrow(length = unit(0.01, "npc")), colour="blue")+
   geom_text(data = arrows, # crudely push labels away arrow heads
-            mapping = aes(label = Label, x = PC1 * 1.1, y = PC2 * 1.1), colour="blue") +
+            mapping = aes(label = label, x = PC1 * 1.1, y = PC2 * 1.1), colour="blue") +
   xlab(paste0(names(labs_PCA[1]), " (", sprintf("%.1f", labs_PCA[1]), "%)"))+
   ylab(paste0(names(labs_PCA[2]), " (", sprintf("%.1f", labs_PCA[2]), "%)"))+
   coord_fixed()
 PCA_XRF
 
-ggsave("outputs/PCA_XRF.png", PCA_XRF, height = 6, width = 10)
+#ggsave("outputs/PCA_XRF.png", PCA_XRF, height = 6, width = 10)
 
 
 ## plot downcore PCA-NIpals factor scores

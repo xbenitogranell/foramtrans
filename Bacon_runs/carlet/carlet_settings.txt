@@ -1,12 +1,12 @@
 74 #d.min
 1620 #d.max
-5 #d.by
+1 #d.by
 0 #depths.file
  #slump
 5 #acc.mean
 2 #acc.shape
-0.7 #mem.mean
-4 #mem.strength
+0.5 #mem.mean
+10 #mem.strength
 NA #boundary
 NA #hiatus.depths
 10000 #hiatus.max
